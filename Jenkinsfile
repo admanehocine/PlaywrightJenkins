@@ -2,7 +2,6 @@ pipeline {
     agent {
         docker {
             image 'playwright/chromium:playwright-1.56.1'
-            image 'mcp/git'
             args '--user=root --entrypoint=""'
         }
     }
@@ -17,6 +16,7 @@ pipeline {
         stage(" CLONE DU PROJET"){
             steps{
                 sh "rm -rf repo"
+                sh 'apt-get update && apt-get install -y git'
                 echo 'version du git'
                 sh 'git --version'
                 sh "git clone https://github.com/admanehocine/PlaywrightJenkins.git repo"
