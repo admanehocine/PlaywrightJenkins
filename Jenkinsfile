@@ -18,6 +18,7 @@ pipeline {
             steps{
                 //clone de  mon projet  le repo
                 sh "git clone https://github.com/admanehocine/PlaywrightJenkins.git repo"
+                sh "ls"
             }
         }
         stage(" VERIFICATION DE L'ENVIRONMENT"){
