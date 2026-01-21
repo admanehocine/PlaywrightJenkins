@@ -27,7 +27,7 @@ pipeline{
             steps{
                 script{
                     if(params.ALLURE){
-                        sh "npx playwright test --grep ${params.TAG} --reporter=junit,allure-playwright"
+                        sh "npx playwright test --grep ${params.TAG} --reporter=allure-playwright"
                         stash name: 'allure-results', includes: 'allure-results/*'
                     }
                     else{
