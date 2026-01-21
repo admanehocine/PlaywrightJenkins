@@ -11,8 +11,8 @@ pipeline {
         stage(" VERIFICATION DE L'ENVIRONMENT"){
             steps{
                 //check version node et playwright
-                sh "echo 'node --version'"
-                sh "echo 'npx playwright --version'"
+                sh "node --version"
+                sh "npx playwright --version"
             }
         }
         stage("CREATION DU REPO"){
