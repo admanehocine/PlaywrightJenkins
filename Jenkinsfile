@@ -1,5 +1,4 @@
-
-            //image 'playwright/chromium:playwright-1.56.1'
+//image 'playwright/chromium:playwright-1.56.1'
 pipeline {
     agent {
         docker {
@@ -48,11 +47,13 @@ pipeline {
                 dir('repo') {
                     script {
                         if (params.ALLURE) {
-                            echo "Lancement des tests avec Allure pour le tag ${params.TAG}"
+                            echo "Lancement tests Allure pour ${params.TAG}"
                             sh "npx playwright test --grep ${params.TAG} --reporter=allure-playwright"
+                            stash name: 'allure-results', includes: 'allure-results/*'
                         } else {
-                            echo "Lancement des tests sans Allure pour le tag ${params.TAG}"
+                            echo "Lancement tests JUnit pour ${params.TAG}"
                             sh "npx playwright test --grep ${params.TAG} --reporter=junit"
+                            stash name: 'junit-report', includes: 'playwright-report/junit/*'
                         }
                     }
                 }
@@ -67,19 +68,22 @@ pipeline {
                 // Archivage Playwright HTML
                 archiveArtifacts artifacts: 'playwright-report/**/*', fingerprint: true
 
-                // Archivage Allure si activé
+                // Archivage et rapport Allure conditionnel
                 script {
                     if (params.ALLURE) {
-                        archiveArtifacts artifacts: 'allure-results/**/*', fingerprint: true
+                        unstash 'allure-results'
+                        archiveArtifacts artifacts: 'allure-results/*', fingerprint: true
                         allure(
                             includeProperties: false,
                             jdk: '',
-                            results: [[path: 'allure-results']]
+                            results: [[path: 'allure-results/']]
                         )
+                    } else {
+                        unstash 'junit-report'
+                        junit 'playwright-report/junit/results.xml'
                     }
                 }
             }
         }
     }
 }
-
