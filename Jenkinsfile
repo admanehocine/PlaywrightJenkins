@@ -1,4 +1,3 @@
-// image 'playwright/chromium:playwright-1.56.1'
 pipeline {
     agent {
         docker {
@@ -47,6 +46,10 @@ pipeline {
                         if (params.ALLURE) {
                             echo "Lancement des tests avec Allure pour ${params.TAG}"
                             sh "npx playwright test --grep ${params.TAG} --reporter=allure-playwright"
+                            
+                            // S'assurer que Jenkins peut accéder aux fichiers Allure
+                            sh 'chmod -R 777 allure-results'
+                            
                             stash name: 'allure-results', includes: 'allure-results/**/*'
                         } else {
                             echo "Lancement des tests JUnit pour ${params.TAG}"
@@ -59,28 +62,26 @@ pipeline {
         }
     }
 
-  post {
-    always {
-        echo ' Archivage des rapports Playwright & Allure'
-        dir('repo') {
-            script {
-                if (params.ALLURE) {
-                    // unstash allure results
-                    unstash 'allure-results'
-                    archiveArtifacts artifacts: 'allure-results/**/*', fingerprint: true
-                    allure(
-                        includeProperties: false,
-                        jdk: '',
-                        results: [[path: 'allure-results/']]
-                    )
-                } else {
-                    unstash 'junit-report'
-                    junit 'playwright-report/junit/results.xml'
-                    archiveArtifacts artifacts: 'playwright-report/junit/**/*', fingerprint: true
+    post {
+        always {
+            echo 'Archivage des rapports Playwright & Allure'
+            dir('repo') {
+                script {
+                    if (params.ALLURE) {
+                        unstash 'allure-results'
+                        archiveArtifacts artifacts: 'allure-results/**/*', fingerprint: true
+                        allure(
+                            includeProperties: false,
+                            jdk: '',
+                            results: [[path: 'allure-results/']]
+                        )
+                    } else {
+                        unstash 'junit-report'
+                        junit 'playwright-report/junit/results.xml'
+                        archiveArtifacts artifacts: 'playwright-report/junit/**/*', fingerprint: true
+                    }
                 }
             }
         }
     }
-}
-
 }
