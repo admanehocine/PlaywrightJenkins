@@ -19,20 +19,9 @@ pipeline {
         )
     }
 
-    environment {
-        WORKDIR = "${env.WORKSPACE}/repo"
-    }
-
     stages {
-        stage('Clone & Install deps') {
+        stage('Install deps') {
             steps {
-                // Supprimer ancien repo
-                sh 'rm -rf repo'
-
-                // Cloner le repo directement dans le conteneur
-                sh 'git clone https://github.com/admanehocine/PlaywrightJenkins.git repo'
-
-                // Installer npm et Playwright
                 sh """
                     cd ${WORKDIR}
                     npm ci
@@ -51,7 +40,7 @@ pipeline {
                             npx playwright test --grep ${params.TAG} --reporter=allure-playwright
                         """
                     } else {
-                        echo "ALLURE = false, exécution simple sans rapport"
+                        echo "ALLURE = false, exécution simple"
                         sh "cd ${WORKDIR} && npx playwright test --grep ${params.TAG}"
                     }
                 }
@@ -63,10 +52,16 @@ pipeline {
         always {
             script {
                 if (params.ALLURE) {
-                    archiveArtifacts artifacts: 'repo/allure-results/*', allowEmptyArchive: true
+                    // On s'assure que les fichiers Allure sont accessibles
+                    sh "chmod -R 777 ${WORKDIR}/allure-results || true"
+
+                    // Archiver les résultats
+                    archiveArtifacts artifacts: 'allure-results/*', allowEmptyArchive: true
+
+                    // Générer le rapport Allure
                     allure includeProperties: false,
                            jdk: '',
-                           results: [[path: 'repo/allure-results/']]
+                           results: [[path: 'allure-results/']]
                 }
             }
         }
