@@ -1,5 +1,10 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'mcr.microsoft.com/playwright:v1.56.1-jammy'
+            args '-u root --entrypoint='
+        }
+    }
 
     parameters {
         choice(
@@ -21,9 +26,13 @@ pipeline {
     stages {
         stage('Clone & Install deps') {
             steps {
-                echo "Clonage du repo et installation des dépendances"
+                // Supprimer ancien repo
                 sh 'rm -rf repo'
+
+                // Cloner le repo directement dans le conteneur
                 sh 'git clone https://github.com/admanehocine/PlaywrightJenkins.git repo'
+
+                // Installer npm et Playwright
                 sh """
                     cd ${WORKDIR}
                     npm ci
@@ -32,28 +41,19 @@ pipeline {
             }
         }
 
-        stage('Run Tests in Docker') {
-            agent {
-                docker {
-                    image 'mcr.microsoft.com/playwright:v1.57.0-noble'
-                    args '-u root --entrypoint='
-                }
-            }
+        stage('Run Tests') {
             steps {
                 script {
-                    echo "Exécution des tests pour le tag ${params.TAG}"
                     if (params.ALLURE) {
+                        echo "Lancement des tests avec Allure pour le tag ${params.TAG}"
                         sh """
                             cd ${WORKDIR}
-                            chmod -R 777 .
                             npx playwright test --grep ${params.TAG} --reporter=allure-playwright
+                            chmod -R 777 allure-results
                         """
-                        stash name: 'allure-results', includes: 'repo/allure-results/*'
                     } else {
-                        sh """
-                            cd ${WORKDIR}
-                            npx playwright test --grep ${params.TAG}
-                        """
+                        echo "ALLURE = false, exécution simple sans rapport"
+                        sh "cd ${WORKDIR} && npx playwright test --grep ${params.TAG}"
                     }
                 }
             }
@@ -64,14 +64,10 @@ pipeline {
         always {
             script {
                 if (params.ALLURE) {
-                    echo "Archivage des résultats Allure"
-                    unstash 'allure-results'
                     archiveArtifacts artifacts: 'repo/allure-results/*', allowEmptyArchive: true
                     allure includeProperties: false,
                            jdk: '',
                            results: [[path: 'repo/allure-results/']]
-                } else {
-                    echo "Pas de rapport Allure à archiver"
                 }
             }
         }
