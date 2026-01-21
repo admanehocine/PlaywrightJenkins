@@ -13,11 +13,15 @@ pipeline {
                 sh 'echo "Playwright version:" && npx playwright --version'
             }
         }
-       
-        
-      
-    }
+        stage(" CLONE DU PROJET"){
+            steps{
+                sh "rm -rf repo"
+                sh "npx playwright test --project=chromium"
+            }
+        }
    
+}
+
 }
 
 
