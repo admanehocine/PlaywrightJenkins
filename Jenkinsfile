@@ -35,12 +35,11 @@ pipeline {
                     if (params.ALLURE) {
                         echo "Lancement des tests avec Allure pour le tag ${params.TAG}"
                         sh """
-                            cd ${WORKDIR}
                             npx playwright test --grep ${params.TAG} --reporter=allure-playwright
                         """
                     } else {
                         echo "ALLURE = false, exécution simple"
-                        sh "cd ${WORKDIR} && npx playwright test --grep ${params.TAG}"
+                        sh "npx playwright test --grep ${params.TAG}"
                     }
                 }
             }
@@ -52,7 +51,7 @@ pipeline {
             script {
                 if (params.ALLURE) {
                     // On s'assure que les fichiers Allure sont accessibles
-                    sh "chmod -R 777 ${WORKDIR}/allure-results || true"
+                    sh "chmod -R 777 allure-results || true"
 
                     // Archiver les résultats
                     archiveArtifacts artifacts: 'allure-results/*', allowEmptyArchive: true
