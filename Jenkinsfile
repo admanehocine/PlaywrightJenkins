@@ -26,21 +26,16 @@ pipeline {
                         }
                     }
                 }
-                stage('run smoke test') {
-                    steps {
-                        dir('repo') {
-                            sh 'npx playwright test --grep @smoke'
-                        }
-                    }
-                }
-                stage('run user test') {
+                stage('run tests') {
                     steps {
                         dir('repo') {
                             script {
                                 if(params.ALLURE) {
+                                    echo "Lancement des tests avec Allure pour le tag ${params.TAG}"
                                     sh "npx playwright test --grep ${params.TAG} --reporter=allure-playwright"
                                     stash name: 'allure-results', includes: 'allure-results/*'
                                 } else {
+                                    echo "Lancement des tests sans Allure pour le tag ${params.TAG}"
                                     sh "npx playwright test --grep ${params.TAG} --reporter=junit"
                                     stash name: 'junit-report', includes: 'playwright-report/junit/*'
                                 }
@@ -55,7 +50,6 @@ pipeline {
         always {
             script {
                 if(params.ALLURE) {
-                    // Supprimer les anciens fichiers Allure avant generate
                     sh 'rm -rf allure-results/*'
                     unstash 'allure-results'
                     archiveArtifacts 'allure-results/*'
@@ -63,11 +57,6 @@ pipeline {
                            jdk: '',
                            results: [[path: 'allure-results/']]
                 }
-                // Optionnel pour JUnit
-                // else {
-                //     unstash 'junit-report'
-                //     junit 'playwright-report/junit/results.xml'
-                // }
             }
         }
     }
