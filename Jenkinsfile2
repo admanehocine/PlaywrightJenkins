@@ -24,7 +24,7 @@ pipeline{
             }
         }
         stage('run user test'){
-            steps{
+            steps{  
                 script{
                     if(params.ALLURE){
                         sh "npx playwright test --grep ${params.TAG} --reporter=allure-playwright"
