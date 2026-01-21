@@ -9,11 +9,11 @@ pipeline {
     stages {
         stage('Display versions') {
             steps {
-                sh 'echo "Node version:" && node --version'
-                sh 'echo "Playwright version:" && npx playwright --version'
+                sh 'node --version'
+                sh 'npm --version'
                 sh 'npm install'
                 sh 'npx playwright install'
-                sh "npx playwright test"
+                sh "npx playwright test --projet=chromium"
             }
         }
    
