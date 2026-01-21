@@ -49,14 +49,7 @@
                 results: [[path: 'repo/allure-results']]
             )
 
-            // HTML Playwright Report
-            publishHTML([
-                reportDir: 'repo/playwright-report',
-                reportFiles: 'index.html',
-                reportName: 'Playwright HTML Report',
-                keepAll: true,
-                alwaysLinkToLastBuild: true
-            ])
+            // HTML Playwright Repor
         }
     }
 }
