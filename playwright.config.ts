@@ -25,10 +25,7 @@ export default defineConfig({
   // reporter: 'html',
 
   // Rapport allure
-  reporter: [
-    ['list'],                          // affiche les logs dans terminal
-    ['allure-playwright']              // génère allure-results
-  ],
+  reporter: 'list',
 
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
