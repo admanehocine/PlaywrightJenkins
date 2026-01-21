@@ -31,7 +31,13 @@ pipeline {
         
       
     }
-   
+   post {
+        always {
+            // Archiver les résultats
+            archiveArtifacts artifacts: 'repo/results/*.*', fingerprint: true
+            junit 'repo/results/*.xml'
+        }
+    }
 }
 
 
