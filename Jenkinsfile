@@ -59,29 +59,28 @@ pipeline {
         }
     }
 
-    post {
-        always {
-            echo 'Archivage des rapports Playwright & Allure'
-            dir('repo') {
-                // Archivage Playwright HTML
-                archiveArtifacts artifacts: 'playwright-report/**/*', fingerprint: true
-            }
-
+  post {
+    always {
+        echo ' Archivage des rapports Playwright & Allure'
+        dir('repo') {
             script {
                 if (params.ALLURE) {
-                    // Déplacer allure-results à la racine avant archiving
+                    // unstash allure results
                     unstash 'allure-results'
-                    archiveArtifacts artifacts: 'repo/allure-results/**/*', fingerprint: true
+                    archiveArtifacts artifacts: 'allure-results/**/*', fingerprint: true
                     allure(
                         includeProperties: false,
                         jdk: '',
-                        results: [[path: 'repo/allure-results/']]
+                        results: [[path: 'allure-results/']]
                     )
                 } else {
                     unstash 'junit-report'
-                    junit 'repo/playwright-report/junit/results.xml'
+                    junit 'playwright-report/junit/results.xml'
+                    archiveArtifacts artifacts: 'playwright-report/junit/**/*', fingerprint: true
                 }
             }
         }
     }
+}
+
 }
