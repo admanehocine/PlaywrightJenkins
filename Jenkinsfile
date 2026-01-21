@@ -2,11 +2,6 @@ pipeline {
     agent {
         docker {
             image 'playwright/chromium:playwright-1.56.1'
-            args '--user=root --entrypoint=""'
-        }
-    }
-    agent {
-        docker {
             image 'mcp/git'
             args '--user=root --entrypoint=""'
         }
