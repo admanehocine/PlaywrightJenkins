@@ -23,7 +23,6 @@ pipeline {
         stage('Install deps') {
             steps {
                 sh """
-                    cd ${WORKDIR}
                     npm ci
                     npx playwright install --with-deps
                 """
