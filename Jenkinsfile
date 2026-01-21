@@ -15,7 +15,7 @@ pipline{
             }
             steps{
                 //clone de  mon projet  le repo
-                sh "git clone https://github.com/admanehocine/PlaywrightJenkins.git"
+                sh "git clone https://github.com/admanehocine/PlaywrightJenkins.git repo"
             }
 
             steps{
