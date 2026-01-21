@@ -15,9 +15,7 @@ pipeline {
             stages {
                 stage('Checkout') {
                     steps {
-                        // Supprimer le dossier repo s'il existe
                         sh 'rm -rf repo'
-                        // Cloner le repo
                         sh 'git clone https://github.com/admanehocine/PlaywrightJenkins.git repo'
                     }
                 }
@@ -57,13 +55,15 @@ pipeline {
         always {
             script {
                 if(params.ALLURE) {
+                    // Supprimer les anciens fichiers Allure avant generate
+                    sh 'rm -rf allure-results/*'
                     unstash 'allure-results'
                     archiveArtifacts 'allure-results/*'
                     allure includeProperties: false,
                            jdk: '',
                            results: [[path: 'allure-results/']]
                 }
-                // Optionnel : gérer junit
+                // Optionnel pour JUnit
                 // else {
                 //     unstash 'junit-report'
                 //     junit 'playwright-report/junit/results.xml'
