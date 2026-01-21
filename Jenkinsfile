@@ -49,7 +49,6 @@ pipeline {
                         sh """
                             cd ${WORKDIR}
                             npx playwright test --grep ${params.TAG} --reporter=allure-playwright
-                            chmod -R 777 allure-results
                         """
                     } else {
                         echo "ALLURE = false, exécution simple sans rapport"
