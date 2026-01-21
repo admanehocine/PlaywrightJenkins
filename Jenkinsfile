@@ -15,12 +15,6 @@ pipeline {
                 sh "npx playwright --version"
             }
         }
-        stage("CREATION DU REPO"){
-            steps{
-                //creer supprimer  le repo
-                sh "rm -rf repo"
-            }
-        }
         stage(" CLONE DU PROJET"){
             steps{
                 //clone de  mon projet  le repo
