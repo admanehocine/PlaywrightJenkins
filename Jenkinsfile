@@ -1,4 +1,4 @@
-//image 'playwright/chromium:playwright-1.56.1'
+// image 'playwright/chromium:playwright-1.56.1'
 pipeline {
     agent {
         docker {
@@ -21,7 +21,7 @@ pipeline {
     }
 
     stages {
-        stage('Display versions') {
+        stage('Display Versions') {
             steps {
                 sh 'node --version'
                 sh 'npm --version'
@@ -33,8 +33,6 @@ pipeline {
             steps {
                 sh 'rm -rf repo'
                 sh 'git clone https://github.com/admanehocine/PlaywrightJenkins.git repo'
-                sh 'ls -la repo'
-
                 dir('repo') {
                     sh 'npm install'
                     sh 'npx playwright install --with-deps'
@@ -47,11 +45,11 @@ pipeline {
                 dir('repo') {
                     script {
                         if (params.ALLURE) {
-                            echo "Lancement tests Allure pour ${params.TAG}"
+                            echo "Lancement des tests avec Allure pour ${params.TAG}"
                             sh "npx playwright test --grep ${params.TAG} --reporter=allure-playwright"
                             stash name: 'allure-results', includes: 'allure-results/*'
                         } else {
-                            echo "Lancement tests JUnit pour ${params.TAG}"
+                            echo "Lancement des tests JUnit pour ${params.TAG}"
                             sh "npx playwright test --grep ${params.TAG} --reporter=junit"
                             stash name: 'junit-report', includes: 'playwright-report/junit/*'
                         }
@@ -63,12 +61,12 @@ pipeline {
 
     post {
         always {
-            echo '📦 Archivage des rapports Playwright & Allure'
+            echo 'Archivage des rapports Playwright & Allure'
             dir('repo') {
                 // Archivage Playwright HTML
                 archiveArtifacts artifacts: 'playwright-report/**/*', fingerprint: true
 
-                // Archivage et rapport Allure conditionnel
+                // Archivage conditionnel selon le type de rapport
                 script {
                     if (params.ALLURE) {
                         unstash 'allure-results'
