@@ -8,21 +8,26 @@ pipeline {
         }
     }
     stages{
-        stage("demarrage du configuration projet"){
+        stage("CREATION DU REPO"){
             steps{
                 //creer supprimer  le repo
                 sh "rm -rf repo"
             }
+        }
+        stage(" CLONE DU PROJET"){
             steps{
                 //clone de  mon projet  le repo
                 sh "git clone https://github.com/admanehocine/PlaywrightJenkins.git repo"
             }
-
+        }
+        stage(" VERIFICATION DE L'ENVIRONMENT"){
             steps{
                 //check version node et playwright
                 sh "echo 'node --version'"
                 sh "echo 'npx playwright --version'"
             }
+        }
+        stage(" EXECUTION DES TESTS"){
             steps{
                 //acceder  au dossier repo
                 dir('repo'){
