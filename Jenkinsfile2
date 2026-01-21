@@ -1,7 +1,7 @@
 pipeline{
     agent any
     parameters{
-        choice(name:'TAG', choices:['@regression', '@sanity'])
+        choice(name:'TAG', choices:['@regression', '@smoke'])
         booleanParam(name:'ALLURE', defaultValue: false, description: 'generation de rapport allure')
     }
     stages{
