@@ -1,18 +1,16 @@
 pipeline {
-    //installer  l"environment
-    //nodejs , playwright
     agent {
         docker {
             image 'playwright/chromium:playwright-1.56.1'
             args '--user=root --entrypoint=""'
         }
     }
-    stages{
-        stage(" VERIFICATION DE L'ENVIRONMENT"){
-            steps{
-                //check version node et playwright
-                sh "node --version"
-                sh "npx playwright --version"
+
+    stages {
+        stage('Display versions') {
+            steps {
+                sh 'echo "Node version:" && node --version'
+                sh 'echo "Playwright version:" && npx playwright --version'
             }
         }
         stage(" CLONE DU PROJET"){
@@ -20,21 +18,17 @@ pipeline {
                 sh "rm -rf repo"
                 sh "git clone https://github.com/admanehocine/PlaywrightJenkins.git repo"
                 sh "ls -la repo"
-            }
-        }
-      
-        stage(" EXECUTION DES TESTS"){
-            steps{
-                //acceder  au dossier repo
                 dir('repo'){
                     sh "npm install"
                     sh "npx playwright test --project=chromium"
                 }
             }
         }
+        
+      
     }
-
-    //git clone
-    //npm install
-    //npx playwright test --project=chromium --grep=@smoke
+   
 }
+
+
+ 
