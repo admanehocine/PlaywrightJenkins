@@ -1,4 +1,4 @@
-pipline{
+pipeline {
     //installer  l"environment
     //nodejs , playwright
     agent {
