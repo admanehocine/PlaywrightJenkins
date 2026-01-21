@@ -36,8 +36,8 @@ pipeline {
                                     stash name: 'allure-results', includes: 'allure-results/*'
                                 } else {
                                     echo "Lancement des tests sans Allure pour le tag ${params.TAG}"
-                                    sh "npx playwright test --grep ${params.TAG} --reporter=junit"
-                                    stash name: 'junit-report', includes: 'playwright-report/junit/*'
+                                    sh "npx playwright test --grep ${params.TAG}"
+                                    //stash name: 'junit-report', includes: 'playwright-report/junit/*'
                                 }
                             }
                         }
