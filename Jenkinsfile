@@ -1,66 +1,73 @@
 pipeline {
-    agent {
-        docker {
-            image 'mcr.microsoft.com/playwright:v1.57.0-noble'
-            args '-u root --entrypoint='
-        }
-    }
-
+    agent any
     parameters {
-        choice(
-            name: 'TAG',
-            choices: ['@smoke', '@valide', '@invalide', '@regression'],
-            description: 'Choisir le tag de test à exécuter'
-        )
-        booleanParam(
-            name: 'ALLURE',
-            defaultValue: false,
-            description: 'Génération de rapport Allure'
-        )
+        choice(name: 'TAG', choices: ['@regression', '@smoke'])
+        booleanParam(name: 'ALLURE', defaultValue: false, description: 'generation de rapport allure')
     }
-
     stages {
-        stage('Install deps') {
-            steps {
-                sh """
-                    npm ci
-                    npx playwright install --with-deps
-                """
+        stage('global stage') {
+            agent {
+                docker {
+                    image 'mcr.microsoft.com/playwright:v1.57.0-noble'
+                    args '-u root --entrypoint='
+                }
             }
-        }
-
-        stage('Run Tests') {
-            steps {
-                script {
-                    if (params.ALLURE) {
-                        echo "Lancement des tests avec Allure pour le tag ${params.TAG}"
-                        sh """
-                            npx playwright test --grep ${params.TAG} --reporter=allure-playwright
-                        """
-                    } else {
-                        echo "ALLURE = false, exécution simple"
-                        sh "npx playwright test --grep ${params.TAG}"
+            stages {
+                stage('Checkout') {
+                    steps {
+                        // Supprimer le dossier repo s'il existe
+                        sh 'rm -rf repo'
+                        // Cloner le repo
+                        sh 'git clone https://github.com/admanehocine/PlaywrightJenkins.git repo'
+                    }
+                }
+                stage('install deps') {
+                    steps {
+                        dir('repo') {
+                            sh 'npm ci'
+                        }
+                    }
+                }
+                stage('run smoke test') {
+                    steps {
+                        dir('repo') {
+                            sh 'npx playwright test --grep @smoke'
+                        }
+                    }
+                }
+                stage('run user test') {
+                    steps {
+                        dir('repo') {
+                            script {
+                                if(params.ALLURE) {
+                                    sh "npx playwright test --grep ${params.TAG} --reporter=allure-playwright"
+                                    stash name: 'allure-results', includes: 'allure-results/*'
+                                } else {
+                                    sh "npx playwright test --grep ${params.TAG} --reporter=junit"
+                                    stash name: 'junit-report', includes: 'playwright-report/junit/*'
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
     }
-
     post {
         always {
             script {
-                if (params.ALLURE) {
-                    // On s'assure que les fichiers Allure sont accessibles
-                    sh "chmod -R 777 allure-results || true"
-
-                    // Archiver les résultats
-                    archiveArtifacts artifacts: 'allure-results/*', allowEmptyArchive: true
-
-                    // Générer le rapport Allure
+                if(params.ALLURE) {
+                    unstash 'allure-results'
+                    archiveArtifacts 'allure-results/*'
                     allure includeProperties: false,
                            jdk: '',
                            results: [[path: 'allure-results/']]
                 }
+                // Optionnel : gérer junit
+                // else {
+                //     unstash 'junit-report'
+                //     junit 'playwright-report/junit/results.xml'
+                // }
             }
         }
     }
