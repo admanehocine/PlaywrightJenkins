@@ -5,6 +5,12 @@ pipeline {
             args '--user=root --entrypoint=""'
         }
     }
+    agent {
+        docker {
+            image 'mcp/git'
+            args '--user=root --entrypoint=""'
+        }
+    }
 
     stages {
         stage('Display versions') {
