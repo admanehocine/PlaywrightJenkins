@@ -48,10 +48,10 @@ pipeline {
                 dir('repo') {
                     script {
                         if (params.ALLURE) {
-                            echo "🚀 Lancement des tests avec Allure pour le tag ${params.TAG}"
+                            echo "Lancement des tests avec Allure pour le tag ${params.TAG}"
                             sh "npx playwright test --grep ${params.TAG} --reporter=allure-playwright"
                         } else {
-                            echo "🚀 Lancement des tests sans Allure pour le tag ${params.TAG}"
+                            echo "Lancement des tests sans Allure pour le tag ${params.TAG}"
                             sh "npx playwright test --grep ${params.TAG} --reporter=junit"
                         }
                     }
