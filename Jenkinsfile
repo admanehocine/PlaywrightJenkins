@@ -1,5 +1,10 @@
 pipeline {
-    agent any
+   agent {
+                docker {
+                    image 'mcr.microsoft.com/playwright:v1.57.0-noble'
+                    args '-u root --entrypoint='
+                }
+            }
 
     parameters {
         choice(
@@ -16,12 +21,7 @@ pipeline {
 
     stages {
         stage('Run Tests in Docker') {
-            agent {
-                docker {
-                    image 'mcr.microsoft.com/playwright:v1.57.0-noble'
-                    args '-u root --entrypoint='
-                }
-            }
+            
             steps {
                 script {
                     // Forcer les permissions pour éviter les erreurs sur node_modules / allure-results
