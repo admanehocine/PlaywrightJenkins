@@ -26,40 +26,39 @@ pipeline {
                         }
                     }
                 }
-                stage('run tests') {
+               stage('run tests') {
                     steps {
                         dir('repo25') {
                             script {
+                                sh 'rm -rf allure-results'   // nettoyage TOTAL
+                                sh 'mkdir -p allure-results'
+
                                 if(params.ALLURE) {
-                                    //echo "Lancement des tests avec Allure pour le tag ${params.TAG}"
                                     sh "npx playwright test --grep ${params.TAG} --reporter=allure-playwright"
-                                    stash name: 'allure-results', includes: 'allure-results/*'
+                                    stash name: 'allure-results', includes: 'allure-results/**'
                                 } else {
-                                    echo "Lancement des tests sans Allure pour le tag ${params.TAG}"
                                     sh "npx playwright test --grep ${params.TAG}"
-                                    //stash name: 'junit-report', includes: 'playwright-report/junit/*'
                                 }
                             }
                         }
                     }
+                }       
+            }
+        }
+    }
+   post {
+    always {
+        script {
+            if(params.ALLURE) {
+                dir('repo25') {
+                    sh 'rm -rf allure-results'
+                    unstash 'allure-results'
+                    archiveArtifacts artifacts: 'allure-results/**', fingerprint: true
+                    allure results: [[path: 'allure-results']]
                 }
             }
         }
     }
-    post {
-        always {
-            script {
-                if(params.ALLURE) {
-                    dir('repo25') {
-                        sh 'rm -rf allure-results/*'
-                        unstash 'allure-results'
-                        archiveArtifacts 'allure-results/*'
-                        allure includeProperties: false,
-                            jdk: '',
-                            results: [[path: 'allure-results/']]
-                    }
-                }
-            }
-        }
-    }
+}
+
 }
