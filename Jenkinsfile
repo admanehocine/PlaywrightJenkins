@@ -15,20 +15,20 @@ pipeline {
             stages {
                 stage('Checkout') {
                     steps {
-                        sh 'rm -rf repo'
-                        sh 'git clone https://github.com/admanehocine/PlaywrightJenkins.git repo'
+                        sh 'rm -rf repo25'
+                        sh 'git clone https://github.com/admanehocine/PlaywrightJenkins.git repo25'
                     }
                 }
                 stage('install deps') {
                     steps {
-                        dir('repo') {
+                        dir('repo25') {
                             sh 'npm ci'
                         }
                     }
                 }
                 stage('run tests') {
                     steps {
-                        dir('repo') {
+                        dir('repo25') {
                             script {
                                 if(params.ALLURE) {
                                     //echo "Lancement des tests avec Allure pour le tag ${params.TAG}"
@@ -50,12 +50,14 @@ pipeline {
         always {
             script {
                 if(params.ALLURE) {
-                    sh 'rm -rf allure-results/*'
-                    unstash 'allure-results'
-                    archiveArtifacts 'allure-results/*'
-                    allure includeProperties: false,
-                           jdk: '',
-                           results: [[path: 'allure-results/']]
+                    dir('repo25') {
+                        sh 'rm -rf allure-results/*'
+                        unstash 'allure-results'
+                        archiveArtifacts 'allure-results/*'
+                        allure includeProperties: false,
+                            jdk: '',
+                            results: [[path: 'allure-results/']]
+                    }
                 }
             }
         }
