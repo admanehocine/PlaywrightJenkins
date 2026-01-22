@@ -31,7 +31,7 @@ pipeline {
                         dir('repo') {
                             script {
                                 if(params.ALLURE) {
-                                    echo "Lancement des tests avec Allure pour le tag ${params.TAG}"
+                                    //echo "Lancement des tests avec Allure pour le tag ${params.TAG}"
                                     sh "npx playwright test --grep ${params.TAG} --reporter=allure-playwright"
                                     stash name: 'allure-results', includes: 'allure-results/*'
                                 } else {
